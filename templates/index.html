@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pharma Job Scraper</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 1000px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #1e3a8a;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .control-panel {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        select {
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1em;
+            flex: 1;
+            min-width: 250px;
+            transition: all 0.3s ease;
+            background-color: white;
+            cursor: pointer;
+        }
+
+        select:hover {
+            border-color: #667eea;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 150px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: #059669;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-secondary:disabled {
+            background: #d1d5db;
+            cursor: not-allowed;
+        }
+
+        .results {
+            margin-top: 30px;
+        }
+
+        .status-message {
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .status-message.success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #6ee7b7;
+        }
+
+        .status-message.error {
+            background: #fee2e2;
+            color: #7f1d1d;
+            border: 1px solid #fca5a5;
+        }
+
+        .status-message.loading {
+            background: #dbeafe;
+            color: #0c2340;
+            border: 1px solid #93c5fd;
+        }
+
+        .jobs-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .jobs-table thead {
+            background: #f3f4f6;
+        }
+
+        .jobs-table th {
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #1f2937;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .jobs-table td {
+            padding: 12px;
+            border-bottom: 1px solid #e5e7eb;
+            color: #374151;
+        }
+
+        .jobs-table tbody tr:hover {
+            background: #f9fafb;
+        }
+
+        .jobs-table a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .jobs-table a:hover {
+            text-decoration: underline;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #667eea;
+            margin-left: 5px;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+            color: #999;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .control-panel {
+                flex-direction: column;
+            }
+
+            select, button {
+                width: 100%;
+                min-width: unset;
+            }
+
+            .jobs-table {
+                font-size: 0.9em;
+            }
+
+            .jobs-table th, .jobs-table td {
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Pharma Job Scraper</h1>
+            <p>Find pharmaceutical jobs across India</p>
+        </div>
+
+        <div class="control-panel">
+            <select id="roleSelect">
+                <option value="">-- Select a Role --</option>
+                {% for role in roles %}
+                    <option value="{{ role }}">{{ role }}</option>
+                {% endfor %}
+            </select>
+            <button id="scrapeBtn" class="btn-primary" onclick="scrapeJobs()">
+                🔎 Scrape Jobs
+            </button>
+            <button id="downloadBtn" class="btn-secondary" disabled onclick="downloadCSV()">
+                ⬇️ Download CSV
+            </button>
+        </div>
+
+        <div id="results" class="results"></div>
+
+        <div class="footer">
+            Made by <strong>Naman Pandey</strong>
+        </div>
+    </div>
+
+    <script>
+        async function scrapeJobs() {
+            const role = document.getElementById('roleSelect').value;
+            
+            if (!role) {
+                alert('Please select a role first!');
+                return;
+            }
+
+            const resultsDiv = document.getElementById('results');
+            const scrapeBtn = document.getElementById('scrapeBtn');
+            const downloadBtn = document.getElementById('downloadBtn');
+
+            // Show loading state
+            resultsDiv.innerHTML = `<div class="status-message loading">Scraping jobs for <strong>${role}</strong><span class="loading"></span></div>`;
+            scrapeBtn.disabled = true;
+            downloadBtn.disabled = true;
+
+            try {
+                const response = await fetch('/api/scrape', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ role: role })
+                });
+
+                const data = await response.json();
+                scrapeBtn.disabled = false;
+
+                if (data.success) {
+                    resultsDiv.innerHTML = `
+                        <div class="status-message success">${data.message}</div>
+                        ${data.table}
+                    `;
+                    downloadBtn.disabled = false;
+                } else {
+                    resultsDiv.innerHTML = `<div class="status-message error">❌ ${data.message}</div>`;
+                    downloadBtn.disabled = true;
+                }
+            } catch (error) {
+                scrapeBtn.disabled = false;
+                resultsDiv.innerHTML = `<div class="status-message error">❌ Error: ${error.message}</div>`;
+                downloadBtn.disabled = true;
+            }
+        }
+
+        async function downloadCSV() {
+            try {
+                const response = await fetch('/api/download');
+                
+                if (!response.ok) {
+                    const data = await response.json();
+                    alert(data.message);
+                    return;
+                }
+
+                // Create a blob from the response
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                
+                // Extract filename from response headers
+                const disposition = response.headers.get('content-disposition');
+                const filename = disposition ? 
+                    disposition.split('filename=')[1].replace(/"/g, '') : 
+                    'pharma_jobs.csv';
+                
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            } catch (error) {
+                alert(`Download failed: ${error.message}`);
+            }
+        }
+
+        // Allow Enter key to trigger scrape
+        document.getElementById('roleSelect').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') scrapeJobs();
+        });
+    </script>
+</body>
+</html>
